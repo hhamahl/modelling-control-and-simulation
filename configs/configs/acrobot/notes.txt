@@ -1,0 +1,52 @@
+controller_gains:
+    - 18.1036
+    - 16.2659
+    - 3.73412   
+    cost: 10.0
+    ctrl_period_seconds: 0.0025
+    ctrl_pub_topic: cmd
+    dt: 0.0
+    equilibrium_state:
+    - 0.0
+    - 3.141592653589793
+    - 0.0
+    - 0.0
+    equilibrium_input:
+    - 0.0
+    #joint_acceleration_limit: []
+    #joint_position_limits: []
+    joint_torque_limits: [10.0]
+    #joint_velocity_limits: []
+    lqr_Q:
+    - 1.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 1.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 1.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 1.0
+    lqr_R:
+    - 1.0
+    mean: 0.0
+    qos_overrides:
+      /parameter_events:
+        publisher:
+          depth: 1000
+          durability: volatile
+          history: keep_last
+          reliability: reliable
+    saturation: 10.0
+    start_type_description_service: true
+    state_sub_topic: state
+    stddev: 0.1
+    urdf: ../models/acrobot/acrobot_controller.urdf
+    use_sim_time: false

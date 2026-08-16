@@ -1,0 +1,25 @@
+acrobot:
+  dt: 0.0
+  boundary_time: 120.0
+  runs: 100
+  init_state:
+  - 0.0
+  - 0.1
+  - 0.0
+  - 0.0
+  realtime_target_rate: 1.0
+  zero_order_hold_sec: 0.025
+  zero_order_hold_offset: 0.0
+  ticks_per_revolution: 10000
+  time_tol: 1.0
+  eq_error_tol: 5.0
+  population_size: 1000
+  n_variables: 3
+  mutation_rate: 0.03
+  cross_over_rate: 0.8
+  tournament_selection_rate: 0.75
+  max_gain: 10.0
+  urdf: ../models/acrobot/acrobot_controller.urdf
+  log: ../data/variable_init_states.csv
+  notes: variable init states
+  

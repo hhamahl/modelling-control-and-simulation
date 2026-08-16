@@ -14,6 +14,8 @@ find_package(yaml-cpp REQUIRED)
 add_library(${PROJECT_NAME} 
     SHARED
         src/controllers/acrobot/collocated_energy_ctrl.cpp
+        src/controllers/cartpole/collocated_energy_ctrl.cpp
+        src/controllers/pendubot/collocated_energy_ctrl.cpp     
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC
@@ -26,10 +28,22 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
     yaml-cpp::yaml-cpp
 )
 
-add_executable(acrobot_collocated_energy_ctrl apps/acrobot_collocated_energy_ctrl.cpp)
-add_executable(acrobot_visualization apps/acrobot_visualization.cpp)
+add_executable(acrobot_swingup_ga_optimize_gains 
+    apps/acrobot_swingup_ga_optimize_gains.cpp)
+add_executable(acrobot_swingup_ga_optimize_gains_lqrQ_lqrR 
+    apps/acrobot_swingup_ga_optimize_gains_lqrQ_lqrR.cpp)
 
-target_link_libraries(acrobot_collocated_energy_ctrl
+add_executable(acrobot_visualization apps/acrobot_visualization.cpp)
+add_executable(cartpole_visualization apps/cartpole_visualization.cpp)
+add_executable(pendubot_visualization apps/pendubot_visualization.cpp)
+add_executable(quadrotor_visualization apps/quadrotor_visualization.cpp)
+
+target_link_libraries(acrobot_swingup_ga_optimize_gains
+    PUBLIC
+        ${PROJECT_NAME}
+)
+
+target_link_libraries(acrobot_swingup_ga_optimize_gains_lqrQ_lqrR
     PUBLIC
         ${PROJECT_NAME}
 )
@@ -38,4 +52,21 @@ target_link_libraries(acrobot_visualization
     PUBLIC
         ${PROJECT_NAME}
 )
+
+target_link_libraries(cartpole_visualization
+    PUBLIC
+        ${PROJECT_NAME}
+)
+
+target_link_libraries(pendubot_visualization
+    PUBLIC
+        ${PROJECT_NAME}
+)
+
+target_link_libraries(quadrotor_visualization
+    PUBLIC
+        ${PROJECT_NAME}
+)
+
+
 

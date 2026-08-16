@@ -1,0 +1,19 @@
+init:
+    - 1.0
+    - 0.0
+    - 0.0
+    - 0.0 // quaternion
+    - 0.0 // x? yes
+    - 0.0 // y? yes
+    - 0.0 // z? yes
+    - 0.0 // rotate x global
+    - 0.0 // rotate y
+    - 0.0 // rotate z
+    - 0.0 //
+    - 0.0 //
+    - 0.0 //
+
+
+actuation input ports? 4
+actuated local z, rotate local x, rotate local y
+Need to adapt the control loop
