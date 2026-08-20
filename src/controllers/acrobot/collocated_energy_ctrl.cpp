@@ -1,7 +1,7 @@
-#include "drake_control_algorithms/controllers/acrobot/collocated_energy_ctrl.hpp"
+#include "modelling_control_and_simulation/controllers/acrobot/collocated_energy_ctrl.hpp"
 
 
-namespace underact_robotics::controllers::acrobot {
+namespace modelling_control_and_simulation::controllers::acrobot {
 
 Eigen::Vector4d CollocatedEnergyCtrl::get_equilibrium_state()
 {
@@ -13,10 +13,33 @@ Eigen::Matrix4d CollocatedEnergyCtrl::get_cost_matrix()
     return S_;
 }
 
+Eigen::Matrix4d CollocatedEnergyCtrl::get_A()
+{
+    return A_;
+}
+
+Eigen::Matrix<double, 4, 1> CollocatedEnergyCtrl::get_B()
+{
+    return B_;
+}
+
 void CollocatedEnergyCtrl::set_config(const CollocatedEnergyCtrlConfig& cfg)
 {
     config_ = cfg;
 }
+
+
+void CollocatedEnergyCtrl::set_K(const Eigen::Matrix<double, 1, 4>& K)
+{
+    K_ = K;
+}
+
+void CollocatedEnergyCtrl::set_S(const Eigen::Matrix4d& S)
+{
+    S_ = S;
+}
+
+
 
 CollocatedEnergyCtrl::CollocatedEnergyCtrl(const CollocatedEnergyCtrlConfig& cfg) : config_{cfg}
 {
@@ -24,15 +47,14 @@ CollocatedEnergyCtrl::CollocatedEnergyCtrl(const CollocatedEnergyCtrlConfig& cfg
     E_eq_ =
             plant_->EvalKineticEnergy(*context_) + plant_->EvalPotentialEnergy(*context_);
     
-    // kinetic energy should be zero
-    //DeclareContinuousState(4);
+    // kinetic energy should be zero  
    
-    state_port_idx_ = this->DeclareVectorInputPort("state_input", 4).get_index();
-    control_port_idx_ = this->DeclareVectorOutputPort(
-                                                        "torque_output",
-                                                        1,
-                                                        &CollocatedEnergyCtrl::CalcControlTorque
-                                                     ).get_index();
+    this->DeclareVectorInputPort("state_input", 4);
+    this->DeclareVectorOutputPort(
+                                    "torque_output",
+                                    1,
+                                    &CollocatedEnergyCtrl::CalcControlTorque
+                                 );
 
 }
 
@@ -88,13 +110,17 @@ void CollocatedEnergyCtrl::SetUpPlantAndLqr() {
         DRAKE_DEMAND(config_.lqrR.size() == 1);
         Eigen::Matrix<double, 1, 1> R{config_.lqrR.at(0)};
 
+        A_ = lin_sys->A();
+        B_ = lin_sys->B();
+        
         auto [K, S] = drake::systems::controllers::LinearQuadraticRegulator(
-                                                                             lin_sys->A(),
-                                                                             lin_sys->B(),
+                                                                             A_,
+                                                                             B_,
                                                                              Q,
                                                                              R
                                                                            );
 
+        
         K_ = K;
         S_ = S;
     
@@ -147,19 +173,21 @@ double CollocatedEnergyCtrl::ComputeTorque(const Eigen::Vector4d& state) const
         
         double E = plant_->EvalPotentialEnergy(*context_) + plant_->EvalKineticEnergy(*context_);
         
-        double M21_M11_inv = M(1,0)/M(0,0);
-        
-        double u_pfl  = -(tau_g(1) - M21_M11_inv*tau_g(0)) +
-                            -M21_M11_inv*(Cv(0)+b1_*state(2)) + Cv(1)+b2_*state(3);
-
         double sat_energy = std::clamp(config_.controllerGains[2]*(E - E_eq_)*state(2),
                                         -config_.saturation,
                                          config_.saturation);
-
-                    
-        u = u_pfl - config_.controllerGains[0]*(error(1)) 
-                  - config_.controllerGains[1]*state(3) 
-                  + sat_energy;
+     
+        double a =  config_.controllerGains[0]*(error(1)) 
+                  - config_.controllerGains[1]*error(3) 
+                  + sat_energy; // desired acc
+        
+        
+        double u_pfl  = (M(1,1)-M(1,0)*M(0,1)/M(0,0))*a
+                        - (tau_g(1) - Cv(1) - b2_*state(3))
+                        +  M(1,0)*(tau_g(0) - Cv(0) - b1_*state(2))/M(0,0); 
+                           
+        
+        u = u_pfl; 
     }
     
 
@@ -209,4 +237,4 @@ CollocatedEnergyCtrl::
 
 
 
-} // underact_robotics::controllers::acrobot
+} // modelling_control_and_simulation::controllers::acrobot
